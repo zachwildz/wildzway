@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zach Wildz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0f14;
+    --glass: rgba(255,255,255,0.035);
+    --glass-border: rgba(255,255,255,0.07);
+    --glass-hover: rgba(255,255,255,0.06);
+    --text: #e8e4de;
+    --text-muted: rgba(232,228,222,0.5);
+    --text-dim: rgba(232,228,222,0.28);
+    --accent: #7eb8d4;
+    --glow: rgba(126,184,212,0.12);
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+
+  #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+  .aurora { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden; }
+  .aurora-blob { position: absolute; border-radius: 50%; filter: blur(130px); opacity: 0.065; animation: drift linear infinite; }
+  .blob1 { width: 900px; height: 600px; background: radial-gradient(ellipse, #3b6f8a, transparent 70%); top: -200px; left: -200px; animation-duration: 40s; }
+  .blob2 { width: 700px; height: 700px; background: radial-gradient(ellipse, #6b4f8a, transparent 70%); top: 30%; right: -250px; animation-duration: 55s; animation-direction: reverse; }
+  .blob3 { width: 500px; height: 400px; background: radial-gradient(ellipse, #2a5a4a, transparent 70%); bottom: 10%; left: 20%; animation-duration: 48s; }
+  @keyframes drift {
+    0%   { transform: translate(0,0) rotate(0deg); }
+    25%  { transform: translate(60px,40px) rotate(90deg); }
+    50%  { transform: translate(30px,-30px) rotate(180deg); }
+    75%  { transform: translate(-40px,20px) rotate(270deg); }
+    100% { transform: translate(0,0) rotate(360deg); }
+  }
+
+  main { position: relative; z-index: 1; }
+  section { padding: 120px 24px; opacity: 1; transform: translateY(0); transition: opacity 0.9s ease, transform 0.9s ease; }
+  section.fade-ready { opacity: 0; transform: translateY(30px); }
+  section.fade-ready.visible { opacity: 1; transform: translateY(0); }
+
+  .container { max-width: 860px; margin: 0 auto; }
+  .container-wide { max-width: 1100px; margin: 0 auto; }
+  h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; line-height: 1.15; }
+  .label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px; display: block; }
+
+  .glass { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 52px 56px; transition: background 0.4s, box-shadow 0.4s, transform 0.4s; }
+  .glass:hover { background: var(--glass-hover); box-shadow: 0 8px 60px rgba(0,0,0,0.3), 0 0 40px var(--glow); transform: translateY(-3px); }
+
+  #hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px; }
+  .symbol { width: 72px; height: 72px; margin: 0 auto 52px; }
+  .hero-headline { font-size: clamp(3.2rem, 8vw, 7rem); letter-spacing: -0.02em; margin-bottom: 32px; }
+  .hero-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 300; font-size: clamp(1.1rem, 2.5vw, 1.55rem); color: var(--text-muted); max-width: 620px; line-height: 1.65; }
+  .hero-aside { margin-top: 28px; font-size: clamp(0.85rem, 1.5vw, 1rem); color: var(--text-dim); letter-spacing: 0.04em; font-style: italic; }
+
+  .scroll-hint { margin-top: 80px; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-dim); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; }
+  .scroll-line { width: 1px; height: 48px; background: linear-gradient(to bottom, transparent, var(--text-dim)); animation: scrollPulse 2s ease-in-out infinite; }
+  @keyframes scrollPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+
+  #who { text-align: center; }
+  #who h2 { font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 12px; }
+  #who .glass { margin-top: 40px; text-align: left; }
+  #who .glass p { font-size: 1.05rem; color: var(--text-muted); margin-bottom: 20px; }
+  #who .glass p:last-child { margin-bottom: 0; }
+
+  #why { padding-top: 80px; padding-bottom: 80px; }
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .why-text h2 { font-size: clamp(2.2rem, 4.5vw, 3.5rem); margin-bottom: 28px; }
+  .why-text p { color: var(--text-muted); margin-bottom: 18px; font-size: 1rem; }
+  .why-text p:last-child { margin-bottom: 0; }
+  .why-visual { display: flex; align-items: center; justify-content: center; }
+  .orbit-wrap { width: 260px; height: 260px; opacity: 0.55; }
+  .orbit-wrap svg { width: 100%; height: 100%; }
+
+  #building { text-align: center; }
+  #building h2 { font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 56px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; text-align: left; }
+  .card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px; padding: 36px 38px; transition: background 0.4s, box-shadow 0.4s, transform 0.4s; cursor: default; }
+  .card:hover { background: rgba(255,255,255,0.065); box-shadow: 0 6px 40px rgba(0,0,0,0.25), 0 0 30px var(--glow); transform: translateY(-4px); }
+  .card-num { font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 14px; opacity: 0.7; }
+  .card h3 { font-size: 1.4rem; margin-bottom: 10px; }
+  .card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+
+  #note { text-align: center; }
+  #note h2 { font-size: clamp(2.2rem, 4.5vw, 3.5rem); margin-bottom: 44px; }
+  .note-inner { max-width: 620px; margin: 0 auto; }
+  #note p { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(1.1rem, 2.2vw, 1.4rem); color: var(--text-muted); line-height: 1.75; margin-bottom: 22px; }
+  #note p:last-child { font-style: normal; color: rgba(232,228,222,0.62); font-size: clamp(1rem, 1.8vw, 1.2rem); }
+
+  footer { padding: 80px 24px 60px; text-align: center; position: relative; z-index: 1; }
+  .divider { width: 200px; height: 1px; margin: 0 auto 60px; background: linear-gradient(to right, transparent, var(--accent), transparent); box-shadow: 0 0 20px var(--glow); }
+  .footer-message { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-muted); max-width: 500px; margin: 0 auto 48px; line-height: 1.7; }
+  .footer-sig { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; letter-spacing: 0.04em; margin-bottom: 18px; }
+  .footer-contact { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .footer-contact a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.05em; transition: color 0.3s; }
+  .footer-contact a:hover { color: var(--accent); }
+
+  @media (max-width: 680px) {
+    .why-grid { grid-template-columns: 1fr; }
+    .why-visual { display: none; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .glass { padding: 36px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="aurora">
+  <div class="aurora-blob blob1"></div>
+  <div class="aurora-blob blob2"></div>
+  <div class="aurora-blob blob3"></div>
+</div>
+
+<canvas id="canvas-bg"></canvas>
+
+<main>
+
+  <section id="hero">
+    <div class="symbol">
+      <svg viewBox="0 0 72 72" fill="none">
+        <circle cx="36" cy="36" r="3" fill="#7eb8d4" opacity="0.9"/>
+        <circle cx="36" cy="10" r="2.5" fill="#b8a4d4" opacity="0.7"/>
+        <circle cx="62" cy="50" r="2.5" fill="#7eb8d4" opacity="0.7"/>
+        <circle cx="10" cy="50" r="2.5" fill="#b8a4d4" opacity="0.7"/>
+        <line x1="36" y1="10" x2="36" y2="36" stroke="rgba(126,184,212,0.3)" stroke-width="0.8"/>
+        <line x1="62" y1="50" x2="36" y2="36" stroke="rgba(184,164,212,0.3)" stroke-width="0.8"/>
+        <line x1="10" y1="50" x2="36" y2="36" stroke="rgba(126,184,212,0.3)" stroke-width="0.8"/>
+        <line x1="36" y1="10" x2="62" y2="50" stroke="rgba(184,164,212,0.12)" stroke-width="0.6"/>
+        <line x1="36" y1="10" x2="10" y2="50" stroke="rgba(126,184,212,0.12)" stroke-width="0.6"/>
+        <line x1="62" y1="50" x2="10" y2="50" stroke="rgba(200,200,200,0.08)" stroke-width="0.6"/>
+        <circle cx="36" cy="36" r="28" stroke="rgba(126,184,212,0.08)" stroke-width="0.8" stroke-dasharray="4 8"/>
+        <circle cx="36" cy="36" r="20" stroke="rgba(184,164,212,0.06)" stroke-width="0.6" stroke-dasharray="2 12"/>
+      </svg>
+    </div>
+    <h1 class="hero-headline">DT — What's up Man?</h1>
+    <p class="hero-sub">"I don't reach out like this, but I've learned that when something feels aligned it's louder when I ignore it."</p>
+    <p class="hero-aside">The acid, though really good, was to grab your attention. Big dreams in small towns.</p>
+    <div class="scroll-hint">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+  </section>
+
+  <section id="who">
+    <div class="container">
+      <span class="label">Introduction</span>
+      <h2>Who I Am</h2>
+      <div class="glass">
+        <p>I think in modular layers and care deeply about cohesion. My weakness is the same as my strength — I carry too much alone, expand further than I should, and build quietly until things are ready. It's a pattern I'm aware of, and one I'm learning to share.</p>
+        <p>I'm interested in systems that respond to participation — environments where interaction creates awareness instead of distraction.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="container-wide">
+      <div class="why-grid">
+        <div class="why-text">
+          <span class="label">Context</span>
+          <h2>Why I Reached Out</h2>
+          <p>I'm not looking for exposure or surface-level collaboration.</p>
+          <p>I'm interested in resonance — building with people who think differently, who follow ideas into depth and treat curiosity as something alive.</p>
+          <p>Different mediums. Similar questions.</p>
+          <p>The way you explore consciousness through humor and conversation feels adjacent to how I explore it through systems and design.</p>
+        </div>
+        <div class="why-visual">
+          <div class="orbit-wrap">
+            <svg viewBox="0 0 260 260" fill="none">
+              <ellipse cx="130" cy="130" rx="110" ry="45" stroke="rgba(126,184,212,0.08)" stroke-width="0.8"/>
+              <ellipse cx="130" cy="130" rx="90" ry="36" stroke="rgba(184,164,212,0.07)" stroke-width="0.8" transform="rotate(60 130 130)"/>
+              <ellipse cx="130" cy="130" rx="70" ry="28" stroke="rgba(126,184,212,0.07)" stroke-width="0.8" transform="rotate(-60 130 130)"/>
+              <circle cx="130" cy="130" r="5" fill="#7eb8d4" opacity="0.6"/>
+              <circle cx="130" cy="130" r="12" stroke="rgba(126,184,212,0.15)" stroke-width="0.8"/>
+              <circle cx="130" cy="130" r="22" stroke="rgba(126,184,212,0.07)" stroke-width="0.6"/>
+              <g><animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="12s" repeatCount="indefinite"/><circle cx="240" cy="130" r="3" fill="#b8a4d4" opacity="0.7"/></g>
+              <g transform="rotate(60 130 130)"><animateTransform attributeName="transform" type="rotate" from="60 130 130" to="420 130 130" dur="18s" repeatCount="indefinite"/><circle cx="220" cy="130" r="2.5" fill="#7eb8d4" opacity="0.6"/></g>
+              <g transform="rotate(-60 130 130)"><animateTransform attributeName="transform" type="rotate" from="-60 130 130" to="300 130 130" dur="22s" repeatCount="indefinite"/><circle cx="200" cy="130" r="2" fill="#b8a4d4" opacity="0.5"/></g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="building">
+    <div class="container-wide">
+      <span class="label">Work</span>
+      <h2>What I'm Building</h2>
+      <div class="cards-grid">
+        <div class="card"><div class="card-num">01</div><h3>Evolving Game Systems</h3><p>Growth as the real progression mechanic.</p></div>
+        <div class="card"><div class="card-num">02</div><h3>Conscious Tools</h3><p>Design that reveals patterns instead of exploiting them.</p></div>
+        <div class="card"><div class="card-num">03</div><h3>Living Ecosystems</h3><p>Systems that improve through use.</p></div>
+        <div class="card"><div class="card-num">04</div><h3>Feedback Loops</h3><p>Where participation strengthens the structure.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="note">
+    <div class="container">
+      <span class="label">Honest</span>
+      <h2>A Personal Note</h2>
+      <div class="note-inner">
+        <p>I've built quietly for years — following instinct, refining ideas, exploring intersections between design and awareness.</p>
+        <p>This felt like one of those moments where you either trust the intuition — or regret not acting on it.</p>
+        <p>And — I'll just say it — I bet I have at least one idea that will knock your socks off.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="divider"></div>
+      <p class="footer-message">If this resonates, I'd genuinely enjoy a conversation.<br>If not, I still appreciate the questions you've helped put into the world.</p>
+      <p class="footer-sig">Zach Wildz</p>
+      <div class="footer-contact">
+        <a href="tel:2603098091">260-309-8091</a>
+        <a href="mailto:zach.wildz@icloud.com">zach.wildz@icloud.com</a>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+// SCROLL REVEAL
+document.querySelectorAll('section:not(#hero)').forEach(function(s) { s.classList.add('fade-ready'); });
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('section:not(#hero)').forEach(function(s) { obs.observe(s); });
+
+// SACRED GEOMETRY
+var canvas = document.getElementById('canvas-bg');
+var ctx = canvas.getContext('2d');
+var TAU = Math.PI * 2;
+var PHI = 1.6180339887;
+var W, H, cx, cy, t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  cx = W / 2; cy = H / 2;
+}
+resize();
+window.addEventListener('resize', resize);
+
+var PAL = [[126,184,212],[184,164,212],[100,200,175],[155,135,220]];
+function col(i, a) {
+  var c = PAL[((Math.floor(i) % 4) + 4) % 4];
+  return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+}
+
+function flowerOfLife(t) {
+  var R = Math.min(W,H) * 0.088;
+  var breathe = 1 + Math.sin(t * 0.22) * 0.032;
+  var centers = [[0,0]];
+  for (var i = 0; i < 6; i++) { var a=(TAU/6)*i; centers.push([Math.cos(a)*R, Math.sin(a)*R]); }
+  for (var i = 0; i < 6; i++) { var a=(TAU/6)*i+TAU/12; centers.push([Math.cos(a)*R*1.732, Math.sin(a)*R*1.732]); }
+  centers.forEach(function(c, idx) {
+    var alpha = 0.022 + Math.sin(t*0.15+idx*0.55)*0.01;
+    ctx.beginPath();
+    ctx.arc(cx+c[0]*breathe, cy+c[1]*breathe, R*breathe, 0, TAU);
+    ctx.strokeStyle = col(idx, alpha);
+    ctx.lineWidth = 0.65;
+    ctx.stroke();
+  });
+  return centers.map(function(c) { return { x: cx+c[0]*breathe, y: cy+c[1]*breathe }; });
+}
+
+function metatronCube(centers, t) {
+  for (var i = 0; i < centers.length; i++) {
+    for (var j = i+1; j < centers.length; j++) {
+      var pulse = 0.5 + Math.sin(t*0.1+i*0.32+j*0.21)*0.5;
+      ctx.beginPath();
+      ctx.moveTo(centers[i].x, centers[i].y);
+      ctx.lineTo(centers[j].x, centers[j].y);
+      ctx.strokeStyle = col(i+j, pulse*0.033);
+      ctx.lineWidth = 0.4;
+      ctx.stroke();
+    }
+  }
+}
+
+function sriYantra(t) {
+  var tiers = [
+    {r:140, n:3, d:1,   s:0.007,  ci:0, a:0.05,  off:0},
+    {r:140, n:3, d:-1,  s:0.005,  ci:1, a:0.05,  off:TAU/6},
+    {r:220, n:3, d:1,   s:0.004,  ci:2, a:0.038, off:0},
+    {r:220, n:3, d:-1,  s:0.003,  ci:3, a:0.038, off:TAU/6},
+    {r:310, n:6, d:1,   s:0.0022, ci:0, a:0.026, off:0},
+    {r:310, n:6, d:-1,  s:0.0018, ci:1, a:0.026, off:TAU/12},
+    {r:415, n:4, d:1,   s:0.0013, ci:2, a:0.02,  off:0},
+    {r:415, n:4, d:-1,  s:0.001,  ci:3, a:0.02,  off:TAU/8},
+    {r:530, n:12,d:1,   s:0.0008, ci:0, a:0.014, off:0}
+  ];
+  tiers.forEach(function(tier) {
+    var rot = t * tier.s * tier.d + tier.off;
+    var step = TAU / tier.n;
+    ctx.beginPath();
+    for (var i = 0; i <= tier.n; i++) {
+      var ang = rot + step * i;
+      var x = cx + Math.cos(ang) * tier.r;
+      var y = cy + Math.sin(ang) * tier.r;
+      if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = col(tier.ci, tier.a + Math.sin(t*0.06)*0.008);
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+  });
+}
+
+function torusField(t) {
+  for (var i = 0; i < 10; i++) {
+    var r = 80 + i * 48;
+    var squeeze = 0.3 + Math.sin(t*0.055+i*0.5)*0.06;
+    var rot = t * 0.0028 * (i%2===0?1:-1) + i*0.38;
+    var a = 0.02 + Math.sin(t*0.08+i*0.65)*0.009;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rot);
+    ctx.scale(1, squeeze);
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, TAU);
+    ctx.strokeStyle = col(i, a);
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+var vesicae = [];
+for (var vi = 0; vi < 6; vi++) {
+  vesicae.push({ angle:(TAU/6)*vi, dist:185+vi*52, spd:0.002+vi*0.0007, r:72+vi*16, ci:vi });
+}
+function vesicaField(t) {
+  vesicae.forEach(function(v) {
+    var a = v.angle + t * v.spd;
+    var px = cx + Math.cos(a)*v.dist, py = cy + Math.sin(a)*v.dist;
+    var alpha = 0.022 + Math.sin(t*0.07+v.angle)*0.01;
+    [-v.r*0.5, v.r*0.5].forEach(function(dx) {
+      ctx.beginPath();
+      ctx.arc(px+dx, py, v.r, 0, TAU);
+      ctx.strokeStyle = col(v.ci, alpha);
+      ctx.lineWidth = 0.45;
+      ctx.stroke();
+    });
+  });
+}
+
+var phiPts = [];
+for (var pi = 0; pi < 55; pi++) {
+  phiPts.push({ a: pi*TAU/PHI, r: Math.sqrt(pi)*18, i: pi });
+}
+function phiSpiral(t) {
+  var rot = t * 0.004;
+  phiPts.forEach(function(p, idx) {
+    var pulse = 1 + Math.sin(t*0.16+idx*0.27)*0.08;
+    var x = cx + Math.cos(p.a+rot)*p.r*pulse;
+    var y = cy + Math.sin(p.a+rot)*p.r*pulse;
+    var a = 0.1 + Math.sin(t*0.1+idx*0.36)*0.07;
+    ctx.beginPath(); ctx.arc(x,y,1.0,0,TAU);
+    ctx.fillStyle = col(idx,a); ctx.fill();
+    if (idx < phiPts.length-1) {
+      var np = phiPts[idx+1];
+      var np2 = 1+Math.sin(t*0.16+(idx+1)*0.27)*0.08;
+      var nx = cx+Math.cos(np.a+rot)*np.r*np2, ny = cy+Math.sin(np.a+rot)*np.r*np2;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(nx,ny);
+      ctx.strokeStyle = col(idx, a*0.3); ctx.lineWidth = 0.35; ctx.stroke();
+    }
+  });
+}
+
+function starPolygons(t) {
+  var configs = [
+    {pts:5,  r:280, spd:0.0038,  ci:0},
+    {pts:6,  r:230, spd:-0.003,  ci:1},
+    {pts:7,  r:370, spd:0.0024,  ci:2},
+    {pts:8,  r:460, spd:-0.002,  ci:3},
+    {pts:12, r:560, spd:0.0012,  ci:0}
+  ];
+  configs.forEach(function(cfg) {
+    var rot = t * cfg.spd;
+    var a = 0.028 + Math.sin(t*0.055)*0.013;
+    ctx.beginPath();
+    for (var i = 0; i <= cfg.pts*2; i++) {
+      var ang = rot + (TAU/(cfg.pts*2))*i;
+      var rad = i%2===0 ? cfg.r : cfg.r*0.42;
+      var x = cx+Math.cos(ang)*rad, y = cy+Math.sin(ang)*rad;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = col(cfg.ci, a);
+    ctx.lineWidth = 0.5; ctx.stroke();
+  });
+}
+
+function sacredGrid(t) {
+  var gridR = Math.min(W,H)*0.44;
+  var lines = 8;
+  for (var g = 0; g < 3; g++) {
+    var rot = t*0.0025*(g+1)*(g%2===0?1:-1)+(TAU/3)*g;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
+    for (var i = -lines; i <= lines; i++) {
+      var x = (i/lines)*gridR;
+      var a = 0.015 + Math.sin(t*0.04+i*0.3)*0.007;
+      ctx.beginPath(); ctx.moveTo(x,-gridR); ctx.lineTo(x,gridR);
+      ctx.strokeStyle = col(g,a); ctx.lineWidth = 0.38; ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+function hexRings(t) {
+  for (var ring = 1; ring <= 7; ring++) {
+    var r = ring*68;
+    var rot = t*0.003*(ring%2===0?1:-1);
+    var a = 0.02+Math.sin(t*0.07+ring*0.8)*0.01;
+    ctx.beginPath();
+    for (var i = 0; i <= 6; i++) {
+      var ang = rot+(TAU/6)*i;
+      var x = cx+Math.cos(ang)*r, y = cy+Math.sin(ang)*r;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = col(ring,a); ctx.lineWidth = 0.55; ctx.stroke();
+  }
+}
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+
+  var vg = ctx.createRadialGradient(cx,cy,Math.min(W,H)*0.12,cx,cy,Math.min(W,H)*0.72);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(1,'rgba(13,15,20,0.52)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0,0,W,H);
+
+  sacredGrid(t);
+  torusField(t);
+  hexRings(t);
+  vesicaField(t);
+  starPolygons(t);
+  sriYantra(t);
+  var centers = flowerOfLife(t);
+  metatronCube(centers, t);
+  phiSpiral(t);
+
+  t += 0.32;
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>
